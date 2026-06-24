@@ -1,76 +1,78 @@
-// 1. Global Navigation Scroll Effect
-const nav = document.querySelector('.global-nav');
-window.addEventListener('scroll', () => {
-  if (window.scrollY > 50) {
-    nav.classList.add('scrolled');
-  } else {
-    nav.classList.remove('scrolled');
-  }
-});
-
-// 5. Core Features Glow Effect
-const featureCards = document.querySelectorAll('.interactive-glow');
-
-featureCards.forEach(card => {
-  card.addEventListener('mousemove', e => {
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    card.style.setProperty('--mouse-x', `${x}px`);
-    card.style.setProperty('--mouse-y', `${y}px`);
-  });
-});
-
-// 8. Value Proposition Progress Rings
-const progressRings = document.querySelectorAll('.progress-ring');
-
-const ringObserver = new IntersectionObserver((entries, observer) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const ring = entry.target;
-      const targetValue = parseInt(ring.getAttribute('data-target'));
-      
-      let currentProgress = 0;
-      const interval = setInterval(() => {
-        currentProgress += 1;
-        const deg = (currentProgress / 100) * 360;
-        ring.style.background = `conic-gradient(var(--brand-cyan) ${deg}deg, var(--glass-bg) 0deg)`;
-        
-        if (currentProgress >= targetValue) {
-          clearInterval(interval);
-        }
-      }, 15);
-      
-      observer.unobserve(ring);
+document.addEventListener('DOMContentLoaded', () => {
+  
+  // 1. Global Navigation Scroll Listener
+  const nav = document.querySelector('.global-nav');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 10) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
     }
   });
-}, { threshold: 0.5 });
 
-progressRings.forEach(ring => ringObserver.observe(ring));
+  // 7. Product Showcase UI Carousel (Tab Logic)
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const canvasPanels = document.querySelectorAll('.canvas-panel');
 
-// 9. FAQ Accordion Interaction
-const faqItems = document.querySelectorAll('.faq-item');
-
-faqItems.forEach(item => {
-  const button = item.querySelector('.faq-question');
-  const answer = item.querySelector('.faq-answer');
-
-  button.addEventListener('click', () => {
-    const isOpen = item.classList.contains('is-open');
-    
-    // Close all open items
-    faqItems.forEach(otherItem => {
-      otherItem.classList.remove('is-open');
-      otherItem.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
-      otherItem.querySelector('.faq-answer').style.maxHeight = null;
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Remove active from all
+      tabBtns.forEach(b => b.classList.remove('active'));
+      canvasPanels.forEach(p => p.classList.remove('active'));
+      
+      // Add active to clicked
+      btn.classList.add('active');
+      const targetId = btn.getAttribute('data-target');
+      document.getElementById(targetId).classList.add('active');
     });
-
-    if (!isOpen) {
-      // Open the clicked item
-      item.classList.add('is-open');
-      button.setAttribute('aria-expanded', 'true');
-      answer.style.maxHeight = answer.scrollHeight + "px";
-    }
   });
+
+  // 10. Performance Outcomes & Benefits (Intersection Observer for Stat Bars)
+  const statFills = document.querySelectorAll('.stat-fill');
+  
+  const observerOptions = {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.5
+  };
+
+  const statObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const fill = entry.target;
+        const width = fill.getAttribute('data-width');
+        fill.style.width = width;
+        observer.unobserve(fill);
+      }
+    });
+  }, observerOptions);
+
+  statFills.forEach(fill => statObserver.observe(fill));
+
+  // 11. Accessible FAQ Accordion Stack
+  const accordionItems = document.querySelectorAll('.accordion-item');
+
+  accordionItems.forEach(item => {
+    const header = item.querySelector('.accordion-header');
+    const content = item.querySelector('.accordion-content');
+
+    header.addEventListener('click', () => {
+      const isActive = item.classList.contains('active');
+      
+      // Close all
+      accordionItems.forEach(acc => {
+        acc.classList.remove('active');
+        acc.querySelector('.accordion-header').setAttribute('aria-expanded', 'false');
+        acc.querySelector('.accordion-content').style.maxHeight = null;
+      });
+
+      // If it wasn't active, open it
+      if (!isActive) {
+        item.classList.add('active');
+        header.setAttribute('aria-expanded', 'true');
+        content.style.maxHeight = content.scrollHeight + 'px';
+      }
+    });
+  });
+
 });
